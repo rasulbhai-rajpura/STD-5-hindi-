@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા - હિન્દી</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --main-bg: #FDF5E6;
+            --card-bg: #FFF9E3;
+            --header-bg: #E3F2FD;
+            --quiz-gradient: linear-gradient(180deg, #fce4ec 0%, #d1c4e9 100%);
+        }
+        body, html {
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            overflow: hidden; font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--main-bg);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* હોમ સ્ક્રીન સ્ટાઈલ */
+        #ui-layer {
+            position: absolute; width: 90%; max-width: 500px; 
+            background: var(--card-bg);
+            padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            text-align: center; z-index: 100; box-sizing: border-box; 
+            border: 2px solid #e6dbb9;
+        }
+
+        .school-name { color: #8b4513; font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+        .teacher-name { color: #5d4037; font-size: 16px; margin-bottom: 20px; border-bottom: 1px solid #d7ccc8; padding-bottom: 15px; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: var(--primary); font-size: 14px; }
+        input, select {
+            width: 100%; padding: 12px; border: 1px solid #ccc;
+            border-radius: 10px; font-size: 16px; box-sizing: border-box; outline: none; background: #fff;
+        }
+
+        .btn-main {
+            width: 100%; padding: 15px; margin-top: 10px; border: none;
+            border-radius: 10px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn-start { background: var(--success); color: white; }
+        .btn-admin { background: #6d4c41; color: white; margin-top: 15px; font-size: 14px; }
+        
+        /* ફ્રન્ટ પેજ ક્રેડિટ */
+        .front-footer { margin-top: 20px; color: #5d4037; font-size: 14px; font-weight: bold; }
+
+        /* ક્વિઝ લેઆઉટ */
+      /* જૂના #quiz-overlay અને #quiz-card ની જગ્યાએ આ મૂકો */
+#quiz-overlay {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: var(--quiz-gradient);
+    display: none; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: flex-start; /* કાર્ડ ઉપરથી શરૂ થશે, જેથી પ્રશ્ન કપાય નહીં */
+    z-index: 150;
+    overflow-y: auto; /* જો મોબાઈલ નાનો હોય તો આખા પેજ પર સ્ક્રોલ થશે */
+    padding: 20px 0; /* ઉપર-નીચે થોડી જગ્યા રાખવા */
+}
+
+#quiz-card {
+    width: 95%; 
+    max-width: 420px; 
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 30px; 
+    padding: 20px; 
+    box-sizing: border-box;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    margin: 10px 0; /* કાર્ડની આજુબાજુ થોડી જગ્યા */
+}
+
+/* પ્રશ્ન બોક્સમાં પણ થોડો સુધારો (જો લિસ્ટમાં ન હોય તો ઉમેરી દેવો) */
+.question-box { 
+    font-size: 19px; 
+    font-weight: 800; 
+    color: #000; 
+    margin-bottom: 20px; 
+    min-height: auto; 
+    text-align: left; 
+    line-height: 1.4;
+}
+
+
+        .quiz-header { display: flex; justify-content: space-between; font-weight: bold; color: #4a148c; margin-bottom: 20px; }
+        .question-box { font-size: 20px; font-weight: 800; color: #000; margin-bottom: 25px; min-height: 80px; text-align: left; }
+
+        .opt-btn {
+            width: 100%; background: white; border: none; padding: 18px;
+            margin-bottom: 12px; border-radius: 15px; font-size: 18px;
+            font-weight: bold; text-align: left; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s;
+        }
+        .opt-btn.correct { background-color: var(--success) !important; color: white; }
+        .opt-btn.wrong { background-color: var(--error) !important; color: white; }
+
+        /* પ્રશ્ન સર્કલ્સ (Dots) */
+        .dots-grid {
+    display: flex;
+    flex-wrap: wrap; /* સર્કલ્સ લાઈન પૂરી થાય એટલે આપોઆપ નીચે જશે */
+    gap: 10px;
+    margin-top: 25px;
+    justify-content: center; /* બધા સર્કલ્સને વચ્ચે ગોઠવશે */
+    padding: 15px;
+    background: #f9f4ff;
+    border-radius: 20px;
+    max-height: 180px; /* 50 પ્રશ્નો માટે ફિક્સ ઊંચાઈ */
+    overflow-y: auto; /* બોક્સની અંદર જ સ્ક્રોલ થશે */
+    border: 1px solid #e1bee7;
+}
+
+.dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: 1.5px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: bold;
+    color: #7e57c2;
+    transition: 0.3s;
+    flex-shrink: 0;
+}
+
+        .dot.current { border: 2px solid #673ab7; transform: scale(1.1); }
+        .dot.is-correct { background: var(--success) !important; color: white; border: none; }
+        .dot.is-wrong { background: var(--error) !important; color: white; border: none; }
+
+        .credit-footer { margin-top: 20px; font-size: 12px; color: #1565c0; text-align: center; font-weight: bold; }
+
+        #admin-panel {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--header-bg); display: none;
+            flex-direction: column; align-items: center; justify-content: center; z-index: 200;
+        }
+        .admin-box { background: #fff; padding: 40px; border-radius: 20px; width: 85%; max-width: 400px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div id="ui-layer">
+    <div class="school-name">શ્રી પાનસડા અનુપમ પ્રાથમિક શાળા</div>
+    <div class="teacher-name">માર્ગદર્શક: શિક્ષક શ્રી રસુલભાઈ રાજપુરા</div>
+    
+    <div class="input-group"><label>વિદ્યાર્થીનું નામ:</label><input type="text" id="studentName" placeholder="તમારું નામ"></div>
+    <div class="input-group"><label>રોલ નંબર:</label><input type="number" id="rollNo" placeholder="રોલ નંબર"></div>
+    <div class="input-group"><label>પાઠ પસંદ કરો:</label>
+        <select id="chapter">
+            <option value="all">તમામ પાઠ (9,10,11,12)</option>
+            <option value="9">પાઠ 9: कैसा शोर  </option>
+            <option value="10">પાઠ 10: सीखो</option>
+            <option value="11">પાઠ 11: सच्चा बालक</option>
+            <option value="12">પાઠ 12: दुम दूमा गांव के बच्चे</option>
+          
+        </select>
+    </div>
+    <button class="btn-main btn-start" onclick="startGame()">રમત શરૂ કરો</button>
+    <button class="btn-main btn-admin" onclick="showAdmin()">શિક્ષક લોગિન</button>
+    <div class="front-footer">ગેમ ક્રિએટેડ બાય: રસુલભાઈ રાજપુરા</div>
+</div>
+
+<div id="quiz-overlay">
+    <div id="quiz-card">
+        <div class="quiz-header">
+            <span id="q-info">પ્રશ્ન 1/25</span>
+            <span>⏱ <span id="timer-val">30</span></span>
+        </div>
+        <div class="question-box" id="q-text">પ્રશ્ન લોડ થઈ રહ્યો છે...</div>
+        <div id="options-container">
+            <button class="opt-btn" onclick="handleSelect('a')" id="btn-a"></button>
+            <button class="opt-btn" onclick="handleSelect('b')" id="btn-b"></button>
+            <button class="opt-btn" onclick="handleSelect('c')" id="btn-c"></button>
+            <button class="opt-btn" onclick="handleSelect('d')" id="btn-d"></button>
+        </div>
+        <div class="dots-grid" id="dots-area"></div>
+        <div class="credit-footer">RASULBHAI RAJPURA, Shree Pansada Anupam Primary School</div>
+    </div>
+</div>
+
+<div id="admin-panel">
+    <div class="admin-box">
+        <h2>શિક્ષક એડમિન પેનલ</h2>
+        <input type="password" id="adminPass" placeholder="એડમિન પાસવર્ડ નાખો">
+        <div id="admin-actions" style="margin-top:20px; display:none;">
+            <p id="record-count"></p>
+            <button class="btn-main" style="background:#2ecc71; color:white;" onclick="downloadData()">Excel રિપોર્ટ ડાઉનલોડ</button>
+            <button class="btn-main" style="background:#f39c12; color:white;" onclick="clearData()">ડેટા સાફ કરો</button>
+        </div>
+        <button class="btn-main" style="background:#e74c3c; color:white; margin-top:10px;" onclick="hideAdmin()">પાછા જાઓ</button>
+    </div>
+</div>
+
+<audio id="sound-correct" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+<audio id="sound-wrong" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+
+<script>
+// તમારા ઓરીજનલ કોડમાંથી લેવામાં આવેલી પ્રશ્ન બેંક
+const questionBank = [
+ {ch: 9, q: "‘कैसा शोर’ पाठ में मुख्य समस्या क्या बताई गई है?", a: "शोर प्रदूषण", b: "जल प्रदूषण", c: "वायु प्रदूषण", d: "मृदा प्रदूषण", correct: "a" }, { ch: 9, q: "शोर का सबसे बड़ा कारण क्या बताया गया है?", a: "पेड़", b: "वाहन", c: "नदियाँ", d: "पहाड़", correct: "b" }, { ch: 9, q: "अत्यधिक शोर से क्या हानि होती है?", a: "भूख बढ़ती है", b: "नींद अच्छी आती है", c: "सुनने की क्षमता घटती है", d: "ऊर्जा बढ़ती है", correct: "c" }, { ch: 9, q: "शोर से किस प्रकार की समस्या होती है?", a: "खुशी", b: "आराम", c: "मनोरंजन", d: "तनाव", correct: "d" }, { ch: 9, q: "स्कूल के आसपास शोर क्यों नहीं होना चाहिए?", a: "पढ़ाई में बाधा", b: "खेल में बाधा", c: "खाना खाने में बाधा", d: "सोने में बाधा", correct: "a" }, { ch: 9, q: "कौन सा उपकरण अधिक शोर करता है?", a: "घड़ी", b: "लाउडस्पीकर", c: "पंखा", d: "बल्ब", correct: "b" }, { ch: 9, q: "शांत वातावरण से क्या लाभ होता है?", a: "बीमारी बढ़ती है", b: "शोर बढ़ता है", c: "ध्यान केंद्रित होता है", d: "उलझन बढ़ती है", correct: "c" }, { ch: 9, q: "शोर को कम करने के लिए क्या करना चाहिए?", a: "जोर से बोलना", b: "हॉर्न बजाना", c: "चिल्लाना", d: "धीरे बोलना", correct: "d" }, { ch: 9, q: "वाहनों का शोर कब अधिक होता है?", a: "ट्रैफिक में", b: "खाली सड़क पर", c: "रात में", d: "सुबह में", correct: "a" }, { ch: 9, q: "शोर से कौन सी बीमारी हो सकती है?", a: "खुशी", b: "सिरदर्द", c: "ताकत", d: "ऊर्जा", correct: "b" }, { ch: 9, q: "शोर को क्या कहा जाता है?", a: "मधुर ध्वनि", b: "संगीत", c: "अप्रिय ध्वनि", d: "मीठी आवाज", correct: "c" }, { ch: 9, q: "शोर से बचने के लिए क्या उपयोगी है?", a: "लाउडस्पीकर", b: "ढोल", c: "पटाखे", d: "ईयरप्लग", correct: "d" }, { ch: 9, q: "घर में शांति कैसे रखी जा सकती है?", a: "धीमी आवाज में बात करके", b: "टीवी तेज करके", c: "चिल्लाकर", d: "गाना बजाकर", correct: "a" }, { ch: 9, q: "कौन सा स्थान शांत होता है?", a: "बाजार", b: "पुस्तकालय", c: "रेलवे स्टेशन", d: "बस स्टैंड", correct: "b" }, { ch: 9, q: "शोर से किस पर असर पड़ता है?", a: "केवल जानवरों पर", b: "केवल पेड़ों पर", c: "मनुष्य और जानवरों पर", d: "केवल पानी पर", correct: "c" }, { ch: 9, q: "अधिक शोर से क्या होता है?", a: "आराम", b: "नींद", c: "सुख", d: "चिड़चिड़ापन", correct: "d" }, { ch: 9, q: "कौन सा त्यौहार शोर बढ़ाता है?", a: "दीवाली", b: "होली", c: "ईद", d: "रक्षाबंधन", correct: "a" }, { ch: 9, q: "शोर कम करने के लिए क्या जरूरी है?", a: "लड़ाई", b: "जागरूकता", c: "झगड़ा", d: "शोर बढ़ाना", correct: "b" }, { ch: 9, q: "शोर से बच्चों पर क्या प्रभाव पड़ता है?", a: "वे खुश रहते हैं", b: "वे खेलते हैं", c: "उनका ध्यान भंग होता है", d: "वे मजबूत होते हैं", correct: "c" }, { ch: 9, q: "किस समय शोर नहीं करना चाहिए?", a: "दिन में", b: "शाम में", c: "सुबह में", d: "रात में", correct: "d" }, { ch: 9, q: "किसे शांति पसंद होती है?", a: "सभी को", b: "किसी को नहीं", c: "केवल बच्चों को", d: "केवल बड़ों को", correct: "a" }, { ch: 9, q: "किससे शोर कम होता है?", a: "जोर से बोलने से", b: "धीरे बोलने से", c: "चिल्लाने से", d: "हॉर्न बजाने से", correct: "b" }, { ch: 9, q: "शोर का दूसरा नाम क्या है?", a: "संगीत", b: "ध्वनि", c: "कोलाहल", d: "स्वर", correct: "c" }, { ch: 9, q: "किससे शांति मिलती है?", a: "शोर से", b: "लड़ाई से", c: "गुस्से से", d: "सन्नाटे से", correct: "d" }, { ch: 9, q: "कौन सा स्थान शोरगुल वाला होता है?", a: "बाजार", b: "मंदिर", c: "पुस्तकालय", d: "घर", correct: "a" }, { ch: 9, q: "शोर से क्या बढ़ता है?", a: "शांति", b: "तनाव", c: "खुशी", d: "आराम", correct: "b" }, { ch: 9, q: "शोर से कौन परेशान होता है?", a: "कोई नहीं", b: "केवल मशीन", c: "मनुष्य", d: "केवल पानी", correct: "c" }, { ch: 9, q: "शोर कम करने के लिए क्या करना चाहिए?", a: "जोर से बोलना", b: "हॉर्न बजाना", c: "चिल्लाना", d: "आवाज धीमी रखना", correct: "d" }, { ch: 9, q: "किससे शोर होता है?", a: "वाहन", b: "पेड़", c: "पानी", d: "हवा", correct: "a" }, { ch: 9, q: "शोर से क्या बिगड़ता है?", a: "स्वास्थ्य", b: "खुशी", c: "ताकत", d: "ऊर्जा", correct: "b" }, { ch: 9, q: "शोर का प्रभाव किस पर पड़ता है?", a: "केवल मशीन", b: "केवल पेड़", c: "सभी जीवों पर", d: "केवल पानी", correct: "c" }, { ch: 9, q: "शोर से क्या करना मुश्किल होता है?", a: "खेलना", b: "खाना", c: "सोचना", d: "चलना", correct: "d" }, { ch: 9, q: "शांत वातावरण कैसा होता है?", a: "सुखद", b: "कठिन", c: "अप्रिय", d: "शोरयुक्त", correct: "a" }, { ch: 9, q: "कौन सा उपकरण शोर करता है?", a: "घड़ी", b: "माइक", c: "किताब", d: "कलम", correct: "b" }, { ch: 9, q: "शोर से क्या कम होता है?", a: "ऊर्जा", b: "शक्ति", c: "एकाग्रता", d: "खुशी", correct: "c" }, { ch: 9, q: "किससे बचना चाहिए?", a: "शांति से", b: "धीरे बोलने से", c: "आराम से", d: "अधिक शोर से", correct: "d" }, { ch: 9, q: "शोर से क्या बिगड़ता है?", a: "स्वास्थ्य", b: "मित्रता", c: "खुशी", d: "ऊर्जा", correct: "a" }, { ch: 9, q: "शोर से क्या बढ़ता है?", a: "शांति", b: "चिंता", c: "आराम", d: "सुख", correct: "b" }, { ch: 9, q: "शोर से क्या होता है?", a: "आराम", b: "खुशी", c: "परेशानी", d: "नींद", correct: "c" }, { ch: 9, q: "किससे शांति मिलती है?", a: "शोर से", b: "चिल्लाने से", c: "लड़ाई से", d: "शांत वातावरण से", correct: "d" },
+ { ch: 10, q: "‘सीखो’ पाठ का मुख्य संदेश क्या है?", a: "अच्छी आदतें अपनाना", b: "खेलना", c: "सोना", d: "लड़ना", correct: "a" }, { ch: 10, q: "हमें किससे सीखना चाहिए?", a: "केवल किताबों से", b: "हर व्यक्ति से", c: "केवल दोस्तों से", d: "केवल शिक्षक से", correct: "b" }, { ch: 10, q: "अच्छी आदतें क्यों जरूरी हैं?", a: "समय खराब करने के लिए", b: "खेलने के लिए", c: "जीवन सुधारने के लिए", d: "लड़ाई करने के लिए", correct: "c" }, { ch: 10, q: "हमें कैसे बोलना चाहिए?", a: "जोर से", b: "चिल्लाकर", c: "तेज", d: "मीठे शब्दों में", correct: "d" }, { ch: 10, q: "हमें बड़ों के साथ कैसा व्यवहार करना चाहिए?", a: "सम्मानपूर्वक", b: "असम्मान से", c: "झगड़कर", d: "अनदेखा करके", correct: "a" }, { ch: 10, q: "हमें किससे दूर रहना चाहिए?", a: "अच्छाई से", b: "बुराई से", c: "सफाई से", d: "ईमानदारी से", correct: "b" }, { ch: 10, q: "हमें समय का क्या करना चाहिए?", a: "बर्बाद", b: "खेलना", c: "सदुपयोग", d: "छोड़ देना", correct: "c" }, { ch: 10, q: "हमें दूसरों से कैसे पेश आना चाहिए?", a: "गुस्से से", b: "झगड़कर", c: "उदास होकर", d: "प्यार से", correct: "d" }, { ch: 10, q: "हमें क्या सीखना चाहिए?", a: "अच्छी बातें", b: "बुरी बातें", c: "लड़ाई", d: "झगड़ा", correct: "a" }, { ch: 10, q: "हमें किसकी मदद करनी चाहिए?", a: "दुश्मनों की", b: "जरूरतमंदों की", c: "जानवरों की", d: "किसी की नहीं", correct: "b" }, { ch: 10, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य बोलना", b: "मदद करना", c: "झूठ बोलना", d: "पढ़ाई करना", correct: "c" }, { ch: 10, q: "हमें कैसे रहना चाहिए?", a: "गंदा", b: "आलसी", c: "लापरवाह", d: "साफ-सुथरा", correct: "d" }, { ch: 10, q: "हमें क्या बोलना चाहिए?", a: "सत्य", b: "झूठ", c: "गलत", d: "कटु", correct: "a" }, { ch: 10, q: "हमें क्या अपनाना चाहिए?", a: "बुराई", b: "ईमानदारी", c: "झूठ", d: "लड़ाई", correct: "b" }, { ch: 10, q: "हमें किससे सीखना चाहिए?", a: "गलत लोगों से", b: "बुरे कामों से", c: "अच्छे लोगों से", d: "झगड़े से", correct: "c" }, { ch: 10, q: "हमें क्या नहीं करना चाहिए?", a: "मदद", b: "सत्य बोलना", c: "अच्छाई", d: "आलस", correct: "d" }, { ch: 10, q: "हमें कैसा व्यवहार करना चाहिए?", a: "नम्र", b: "अहंकारी", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 10, q: "हमें क्या छोड़ देना चाहिए?", a: "अच्छाई", b: "बुरी आदतें", c: "सफाई", d: "ईमानदारी", correct: "b" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "झूठ बोलना", b: "झगड़ा करना", c: "सही काम करना", d: "आलस करना", correct: "c" }, { ch: 10, q: "हमें किससे बचना चाहिए?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "बुराई से", correct: "d" }, { ch: 10, q: "हमें कैसा बनना चाहिए?", a: "अच्छा इंसान", b: "बुरा इंसान", c: "झगड़ालू", d: "आलसी", correct: "a" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "झगड़ा", b: "मदद", c: "आलस", d: "लड़ाई", correct: "b" }, { ch: 10, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "सच्चाई", d: "गुस्सा", correct: "c" }, { ch: 10, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य बोलना", b: "मदद करना", c: "पढ़ना", d: "चोरी", correct: "d" }, { ch: 10, q: "हमें किसका सम्मान करना चाहिए?", a: "बड़ों का", b: "बुरों का", c: "झूठ का", d: "गलत का", correct: "a" }, { ch: 10, q: "हमें किससे सीखना चाहिए?", a: "झगड़े से", b: "अनुभव से", c: "गलत काम से", d: "लड़ाई से", correct: "b" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "गलत काम", b: "झूठ", c: "अच्छे कार्य", d: "लड़ाई", correct: "c" }, { ch: 10, q: "हमें किससे दूर रहना चाहिए?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी संगति से", correct: "d" }, { ch: 10, q: "हमें कैसा बोलना चाहिए?", a: "मीठा", b: "कड़वा", c: "झूठा", d: "गलत", correct: "a" }, { ch: 10, q: "हमें क्या अपनाना चाहिए?", a: "गुस्सा", b: "धैर्य", c: "झगड़ा", d: "लड़ाई", correct: "b" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "आलस", b: "झूठ", c: "मेहनत", d: "गुस्सा", correct: "c" }, { ch: 10, q: "हमें किससे बचना चाहिए?", a: "मेहनत से", b: "सत्य से", c: "मदद से", d: "आलस से", correct: "d" }, { ch: 10, q: "हमें कैसा जीवन जीना चाहिए?", a: "सादा", b: "आलसी", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "झगड़ा", b: "प्यार", c: "लड़ाई", d: "गुस्सा", correct: "b" }, { ch: 10, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "सदाचार", d: "गुस्सा", correct: "c" }, { ch: 10, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य", b: "मदद", c: "पढ़ाई", d: "अहंकार", correct: "d" }, { ch: 10, q: "हमें किसका पालन करना चाहिए?", a: "नियमों का", b: "झूठ का", c: "लड़ाई का", d: "गुस्से का", correct: "a" }, { ch: 10, q: "हमें किससे सीखना चाहिए?", a: "गलत से", b: "प्रकृति से", c: "झगड़े से", d: "लड़ाई से", correct: "b" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "गलत", b: "झूठ", c: "सही", d: "लड़ाई", correct: "c" }, { ch: 10, q: "हमें किससे दूर रहना चाहिए?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "अहंकार से", correct: "d" }, { ch: 10, q: "हमें कैसा बनना चाहिए?", a: "ईमानदार", b: "झूठा", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 10, q: "हमें क्या करना चाहिए?", a: "झगड़ा", b: "सेवा", c: "लड़ाई", d: "गुस्सा", correct: "b" }, { ch: 10, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "सत्य", d: "गुस्सा", correct: "c" }, { ch: 10, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य", b: "मदद", c: "पढ़ाई", d: "चोरी", correct: "d" },
+ { ch: 11, q: "‘सच्चा बालक’ पाठ का मुख्य संदेश क्या है?", a: "सत्य बोलना", b: "खेलना", c: "झूठ बोलना", d: "लड़ना", correct: "a" }, { ch: 11, q: "सच्चा बालक कैसा होता है?", a: "झूठा", b: "ईमानदार", c: "आलसी", d: "शरारती", correct: "b" }, { ch: 11, q: "हमें कैसा बनना चाहिए?", a: "बुरा", b: "झूठा", c: "सच्चा", d: "गुस्सैल", correct: "c" }, { ch: 11, q: "सच्चा बालक क्या नहीं करता?", a: "मदद", b: "पढ़ाई", c: "खेल", d: "झूठ", correct: "d" }, { ch: 11, q: "सच्चा बालक हमेशा क्या बोलता है?", a: "सत्य", b: "झूठ", c: "गलत", d: "कड़वा", correct: "a" }, { ch: 11, q: "सच्चा बालक कैसा व्यवहार करता है?", a: "अहंकारी", b: "नम्र", c: "झगड़ालू", d: "गुस्सैल", correct: "b" }, { ch: 11, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "ईमानदारी", d: "गुस्सा", correct: "c" }, { ch: 11, q: "सच्चा बालक किससे दूर रहता है?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "बुराई से", correct: "d" }, { ch: 11, q: "सच्चा बालक क्या करता है?", a: "मदद", b: "झगड़ा", c: "लड़ाई", d: "गुस्सा", correct: "a" }, { ch: 11, q: "सच्चा बालक किसका सम्मान करता है?", a: "बुरों का", b: "बड़ों का", c: "झूठ का", d: "गलत का", correct: "b" }, { ch: 11, q: "हमें किससे सीखना चाहिए?", a: "गलत से", b: "बुराई से", c: "अच्छों से", d: "झगड़े से", correct: "c" }, { ch: 11, q: "सच्चा बालक क्या नहीं करता?", a: "सत्य बोलना", b: "मदद करना", c: "पढ़ाई करना", d: "चोरी करना", correct: "d" }, { ch: 11, q: "सच्चा बालक कैसा होता है?", a: "दयालु", b: "क्रूर", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 11, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य बोलना", b: "झूठ बोलना", c: "मदद करना", d: "पढ़ाई करना", correct: "b" }, { ch: 11, q: "हमें क्या करना चाहिए?", a: "झगड़ा", b: "झूठ", c: "अच्छे कार्य", d: "गुस्सा", correct: "c" }, { ch: 11, q: "सच्चा बालक किससे बचता है?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "अहंकार से", correct: "d" }, { ch: 11, q: "सच्चा बालक क्या करता है?", a: "सहायता", b: "लड़ाई", c: "झगड़ा", d: "गुस्सा", correct: "a" }, { ch: 11, q: "सच्चा बालक कैसा बोलता है?", a: "कड़वा", b: "मीठा", c: "झूठा", d: "गलत", correct: "b" }, { ch: 11, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "सच्चाई", d: "गुस्सा", correct: "c" }, { ch: 11, q: "सच्चा बालक किससे दूर रहता है?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी संगति से", correct: "d" }, { ch: 11, q: "सच्चा बालक कैसा बनता है?", a: "अच्छा इंसान", b: "बुरा इंसान", c: "झगड़ालू", d: "आलसी", correct: "a" }, { ch: 11, q: "हमें किसका सम्मान करना चाहिए?", a: "बुरों का", b: "बड़ों का", c: "गलत का", d: "झूठ का", correct: "b" }, { ch: 11, q: "हमें क्या करना चाहिए?", a: "गलत काम", b: "झूठ", c: "सही काम", d: "गुस्सा", correct: "c" }, { ch: 11, q: "हमें किससे बचना चाहिए?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुराई से", correct: "d" }, { ch: 11, q: "सच्चा बालक क्या करता है?", a: "सत्य बोलता है", b: "झूठ बोलता है", c: "लड़ाई करता है", d: "गुस्सा करता है", correct: "a" }, { ch: 11, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "ईमानदारी", c: "बुराई", d: "गुस्सा", correct: "b" }, { ch: 11, q: "हमें क्या करना चाहिए?", a: "झगड़ा", b: "झूठ", c: "मदद", d: "गुस्सा", correct: "c" }, { ch: 11, q: "सच्चा बालक क्या नहीं करता?", a: "सत्य", b: "मदद", c: "पढ़ाई", d: "झूठ", correct: "d" }, { ch: 11, q: "सच्चा बालक कैसा होता है?", a: "ईमानदार", b: "झूठा", c: "आलसी", d: "गुस्सैल", correct: "a" }, { ch: 11, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य", b: "झूठ", c: "मदद", d: "पढ़ाई", correct: "b" }, { ch: 11, q: "हमें क्या करना चाहिए?", a: "गलत", b: "झूठ", c: "सही", d: "गुस्सा", correct: "c" }, { ch: 11, q: "सच्चा बालक किससे दूर रहता है?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "बुराई से", correct: "d" }, { ch: 11, q: "सच्चा बालक क्या करता है?", a: "मदद", b: "झगड़ा", c: "लड़ाई", d: "गुस्सा", correct: "a" }, { ch: 11, q: "सच्चा बालक कैसा बोलता है?", a: "कड़वा", b: "मीठा", c: "झूठा", d: "गलत", correct: "b" }, { ch: 11, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "सत्य", d: "गुस्सा", correct: "c" }, { ch: 11, q: "हमें किससे दूर रहना चाहिए?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी संगति से", correct: "d" }, { ch: 11, q: "सच्चा बालक कैसा बनता है?", a: "अच्छा", b: "बुरा", c: "झगड़ालू", d: "आलसी", correct: "a" }, { ch: 11, q: "हमें क्या करना चाहिए?", a: "झगड़ा", b: "मदद", c: "लड़ाई", d: "गुस्सा", correct: "b" }, { ch: 11, q: "हमें क्या अपनाना चाहिए?", a: "झूठ", b: "बुराई", c: "ईमानदारी", d: "गुस्सा", correct: "c" }, { ch: 11, q: "हमें क्या नहीं करना चाहिए?", a: "सत्य", b: "मदद", c: "पढ़ाई", d: "चोरी", correct: "d" },
+ { ch: 12, q: "‘दुम दुमा गांव के बच्चे’ पाठ में किसकी कहानी है?", a: "शहर के बच्चों की", b: "गांव के बच्चों की", c: "शिक्षकों की", d: "व्यापारियों की", correct: "a" }, { ch: 12, q: "दुम दुमा किसका नाम है?", a: "शहर का", b: "गांव का", c: "नदी का", d: "पहाड़ का", correct: "b" }, { ch: 12, q: "गांव के बच्चे कैसे बताए गए हैं?", a: "आलसी", b: "झगड़ालू", c: "मेहनती", d: "शरारती", correct: "c" }, { ch: 12, q: "बच्चे किस जगह रहते हैं?", a: "शहर में", b: "जंगल में", c: "पहाड़ पर", d: "गांव में", correct: "d" }, { ch: 12, q: "गांव के बच्चे क्या करते हैं?", a: "पढ़ाई करते हैं", b: "लड़ाई करते हैं", c: "झगड़ा करते हैं", d: "आलस करते हैं", correct: "a" }, { ch: 12, q: "दुम दुमा गांव के बच्चे कैसे हैं?", a: "आलसी", b: "होशियार", c: "कमजोर", d: "शरारती", correct: "b" }, { ch: 12, q: "बच्चे किसके साथ मिलकर काम करते हैं?", a: "दोस्तों के साथ", b: "अकेले", c: "मिलजुलकर", d: "लड़कर", correct: "c" }, { ch: 12, q: "गांव का वातावरण कैसा बताया गया है?", a: "शोर वाला", b: "गंदा", c: "अंधेरा", d: "साफ-सुथरा", correct: "d" }, { ch: 12, q: "गांव के बच्चे क्या सीखते हैं?", a: "अच्छी बातें", b: "झगड़ा", c: "बुराई", d: "आलस", correct: "a" }, { ch: 12, q: "बच्चे किसका सम्मान करते हैं?", a: "बुरों का", b: "बड़ों का", c: "झूठ का", d: "गलत का", correct: "b" }, { ch: 12, q: "गांव के बच्चे कैसे रहते हैं?", a: "अलग-अलग", b: "लड़कर", c: "मिलजुलकर", d: "झगड़कर", correct: "c" }, { ch: 12, q: "बच्चे किससे दूर रहते हैं?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "बुराई से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे क्या करते हैं?", a: "मदद", b: "लड़ाई", c: "झगड़ा", d: "गुस्सा", correct: "a" }, { ch: 12, q: "गांव के बच्चे कैसे हैं?", a: "झगड़ालू", b: "सच्चे", c: "आलसी", d: "गुस्सैल", correct: "b" }, { ch: 12, q: "बच्चे क्या करना पसंद करते हैं?", a: "झगड़ा", b: "आलस", c: "पढ़ाई", d: "लड़ाई", correct: "c" }, { ch: 12, q: "गांव के बच्चे किससे बचते हैं?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "बुरी आदतों से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे क्या करते हैं?", a: "सहायता", b: "झगड़ा", c: "लड़ाई", d: "गुस्सा", correct: "a" }, { ch: 12, q: "गांव के बच्चे किससे सीखते हैं?", a: "झगड़े से", b: "बड़ों से", c: "बुराई से", d: "लड़ाई से", correct: "b" }, { ch: 12, q: "बच्चे क्या अपनाते हैं?", a: "झूठ", b: "बुराई", c: "अच्छी आदतें", d: "गुस्सा", correct: "c" }, { ch: 12, q: "गांव के बच्चे किससे दूर रहते हैं?", a: "अच्छाई से", b: "सत्य से", c: "मदद से", d: "बुरी संगति से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे कैसे हैं?", a: "मेहनती", b: "आलसी", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 12, q: "बच्चे क्या करते हैं?", a: "झगड़ा", b: "पढ़ाई", c: "लड़ाई", d: "गुस्सा", correct: "b" }, { ch: 12, q: "गांव के बच्चे क्या सीखते हैं?", a: "झूठ", b: "बुराई", c: "अच्छाई", d: "गुस्सा", correct: "c" }, { ch: 12, q: "बच्चे किससे दूर रहते हैं?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी आदतों से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे क्या करते हैं?", a: "मदद करते हैं", b: "झगड़ा करते हैं", c: "लड़ाई करते हैं", d: "गुस्सा करते हैं", correct: "a" }, { ch: 12, q: "गांव के बच्चे किसका सम्मान करते हैं?", a: "बुरों का", b: "बड़ों का", c: "झूठ का", d: "गलत का", correct: "b" }, { ch: 12, q: "बच्चे क्या अपनाते हैं?", a: "झूठ", b: "बुराई", c: "सच्चाई", d: "गुस्सा", correct: "c" }, { ch: 12, q: "बच्चे किससे दूर रहते हैं?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी संगति से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे कैसे हैं?", a: "होशियार", b: "आलसी", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 12, q: "बच्चे क्या करते हैं?", a: "झगड़ा", b: "मदद", c: "लड़ाई", d: "गुस्सा", correct: "b" }, { ch: 12, q: "गांव के बच्चे क्या सीखते हैं?", a: "झूठ", b: "बुराई", c: "अच्छी बातें", d: "गुस्सा", correct: "c" }, { ch: 12, q: "बच्चे किससे दूर रहते हैं?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी आदतों से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे क्या करते हैं?", a: "सहायता करते हैं", b: "झगड़ा करते हैं", c: "लड़ाई करते हैं", d: "गुस्सा करते हैं", correct: "a" }, { ch: 12, q: "गांव के बच्चे किससे सीखते हैं?", a: "झगड़े से", b: "बड़ों से", c: "बुराई से", d: "लड़ाई से", correct: "b" }, { ch: 12, q: "बच्चे क्या अपनाते हैं?", a: "झूठ", b: "बुराई", c: "अच्छी आदतें", d: "गुस्सा", correct: "c" }, { ch: 12, q: "बच्चे किससे दूर रहते हैं?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी संगति से", correct: "d" }, { ch: 12, q: "दुम दुमा गांव के बच्चे कैसे हैं?", a: "मेहनती", b: "आलसी", c: "झगड़ालू", d: "गुस्सैल", correct: "a" }, { ch: 12, q: "बच्चे क्या करते हैं?", a: "झगड़ा", b: "पढ़ाई", c: "लड़ाई", d: "गुस्सा", correct: "b" }, { ch: 12, q: "गांव के बच्चे क्या सीखते हैं?", a: "झूठ", b: "बुराई", c: "अच्छाई", d: "गुस्सा", correct: "c" }, { ch: 12, q: "बच्चे किससे दूर रहते हैं?", a: "सत्य से", b: "अच्छाई से", c: "मदद से", d: "बुरी आदतों से", correct: "d" }
+// ... અહિયાં તમારા અન્ય બધા પ્રશ્નો ઉમેરી શકાય
+];
+
+let questions = [], currentIdx = 0, score = 0, timer = 30, timerId, studentData = {};
+
+function startGame() {
+    const name = document.getElementById('studentName').value;
+    const roll = document.getElementById('rollNo').value;
+    const ch = document.getElementById('chapter').value;
+    if(!name || !roll) return alert("નામ અને રોલ નંબર લખો!");
+
+    studentData = { name, roll, chapter: ch };
+    questions = ch === "all" ? [...questionBank] : questionBank.filter(q => q.ch == ch);
+    questions = questions.sort(() => Math.random() - 0.5).slice(0, 50);
+
+    document.getElementById('ui-layer').style.display = 'none';
+    document.getElementById('quiz-overlay').style.display = 'flex';
+    
+    initDots();
+    renderQuestion();
+}
+
+function initDots() {
+    const area = document.getElementById('dots-area');
+    area.innerHTML = '';
+    questions.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot';
+        d.id = `dot-${i}`;
+        d.innerText = i + 1;
+        area.appendChild(d);
+    });
+}
+
+function renderQuestion() {
+    if(currentIdx >= questions.length) return endBatch();
+    
+    const q = questions[currentIdx];
+    document.getElementById('q-info').innerText = `પ્રશ્ન ${currentIdx + 1}/${questions.length}`;
+    document.getElementById('q-text').innerText = q.q;
+    ['a','b','c','d'].forEach(l => {
+        const btn = document.getElementById(`btn-${l}`);
+        btn.innerText = q[l];
+        btn.className = 'opt-btn';
+        btn.disabled = false;
+    });
+
+    document.querySelectorAll('.dot').forEach(d => d.classList.remove('current'));
+    document.getElementById(`dot-${currentIdx}`).classList.add('current');
+
+    timer = 30;
+    document.getElementById('timer-val').innerText = timer;
+    clearInterval(timerId);
+    timerId = setInterval(() => {
+        timer--;
+        document.getElementById('timer-val').innerText = timer;
+        if(timer <= 0) handleSelect(null);
+    }, 1000);
+}
+
+function handleSelect(ans) {
+    clearInterval(timerId);
+    const correct = questions[currentIdx].correct;
+    const btns = document.querySelectorAll('.opt-btn');
+    const currentDot = document.getElementById(`dot-${currentIdx}`);
+    
+    btns.forEach(b => b.disabled = true);
+
+    if(ans === correct) {
+        score++;
+        document.getElementById(`btn-${ans}`).classList.add('correct');
+        document.getElementById('sound-correct').play();
+        currentDot.classList.add('is-correct'); // સાચા માટે ગ્રીન
+    } else {
+        if(ans) document.getElementById(`btn-${ans}`).classList.add('wrong');
+        document.getElementById(`btn-${correct}`).classList.add('correct');
+        document.getElementById('sound-wrong').play();
+        currentDot.classList.add('is-wrong'); // ખોટા માટે રેડ
+    }
+
+    setTimeout(() => {
+        currentIdx++;
+        renderQuestion();
+    }, 2000);
+}
+
+function endBatch() {
+    saveToLocal();
+    alert(`ક્વિઝ પૂર્ણ!\nનામ: ${studentData.name}\nસ્કોર: ${score}/${questions.length}`);
+    location.reload();
+}
+
+function saveToLocal() {
+    let recs = JSON.parse(localStorage.getItem('pansada_records') || "[]");
+    recs.push({ ...studentData, score: score, total: questions.length, date: new Date().toLocaleString('gu-IN') });
+    localStorage.setItem('pansada_records', JSON.stringify(recs));
+}
+
+function showAdmin() { document.getElementById('admin-panel').style.display = 'flex'; }
+function hideAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+document.getElementById('adminPass').addEventListener('input', (e) => {
+    if(e.target.value === "admin123") {
+        document.getElementById('admin-actions').style.display = 'block';
+        let recs = JSON.parse(localStorage.getItem('pansada_records') || "[]");
+        document.getElementById('record-count').innerText = `કુલ ${recs.length} રેકોર્ડ સેવ છે.`;
+    }
+});
+
+function downloadData() {
+    let recs = JSON.parse(localStorage.getItem('pansada_records') || "[]");
+    if(!recs.length) return alert("ડેટા નથી!");
+    let csv = "\uFEFFરોલ,નામ,પાઠ,સ્કોર,તારીખ\n";
+    recs.forEach(r => csv += `${r.roll},${r.name},${r.chapter},${r.score}/${r.total},${r.date}\n`);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "વિદ્યાર્થી_રિપોર્ટ.csv";
+    link.click();
+}
+
+function clearData() { if(confirm("બધો ડેટા સાફ કરવો છે?")) { localStorage.removeItem('pansada_records'); location.reload(); } }
+</script>
+</body>
+</html>
